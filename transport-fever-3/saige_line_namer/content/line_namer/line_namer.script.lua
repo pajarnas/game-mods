@@ -5,21 +5,24 @@
 local M = {}
 
 -- RGB 0-255. Shades: [1] trunk (darkest), [2] direct, [3] feeder (lightest).
+-- Hues follow what is carried: oil is black, coal and ore are earth brown,
+-- steel and timber are rust red, goods are sea-freight blue, universal is grey.
 local CARGO_COLORS = {
-	L = { { 43, 34, 56 },  { 78, 61, 102 },  { 154, 136, 184 } }, -- liquid
-	B = { { 107, 58, 18 }, { 181, 101, 29 }, { 224, 163, 92 } },  -- bulk
-	P = { { 36, 64, 90 },  { 77, 117, 152 }, { 147, 180, 208 } }, -- flatbed
-	G = { { 31, 90, 58 },  { 46, 139, 87 },  { 134, 205, 163 } }, -- goods
-	U = { { 110, 110, 110 }, { 168, 168, 168 }, { 226, 226, 226 } }, -- universal
+	L = { { 35, 32, 43 },  { 74, 68, 88 },   { 154, 147, 171 } }, -- liquid: oil black
+	B = { { 107, 58, 18 }, { 181, 101, 29 }, { 224, 163, 92 } },  -- bulk: earth brown
+	P = { { 122, 36, 24 }, { 181, 64, 44 },  { 232, 154, 133 } }, -- flatbed: rust red
+	G = { { 30, 58, 138 }, { 37, 99, 235 },  { 147, 197, 253 } }, -- goods: freight blue
+	U = { { 110, 110, 110 }, { 168, 168, 168 }, { 226, 226, 226 } }, -- universal: grey
 }
 local ROLE_SHADE = { T = 1, D = 2, F = 3 }
+-- Passenger lines are all green; each mode gets its own shade.
 local PAX_COLORS = {
-	R = { 200, 51, 43 },   -- rail
-	B = { 47, 111, 208 },  -- bus
-	T = { 227, 181, 5 },   -- tram
-	A = { 122, 79, 196 },  -- air
-	S = { 28, 154, 154 },  -- ship
-	H = { 208, 80, 138 },  -- helicopter
+	R = { 20, 83, 45 },    -- rail: forest
+	S = { 15, 118, 110 },  -- ship: teal
+	A = { 16, 163, 127 },  -- air: jade
+	B = { 34, 163, 90 },   -- bus: grass
+	T = { 107, 170, 31 },  -- tram: lime
+	H = { 158, 217, 168 }, -- helicopter: mint
 }
 
 local SCAN_EVERY = 120 -- simulation steps between scans

@@ -1,51 +1,59 @@
-# 线路命名台（saige_line_namer）
+# Line Namer (saige_line_namer)
 
-狂热运输3 脚本 mod。给线路起名时只写前缀，mod 会自动补上编号，并按货物品类设置线路颜色。
+English | [简体中文](README.zh-CN.md)
 
-## 用法
+Script mod for Transport Fever 3. Type only a prefix when you name a line, and the mod fills in the number and sets the line color by cargo category.
 
-在游戏里新建或重命名线路时，把名字写成：
+## Usage
+
+When you create or rename a line in game, name it like this:
 
 ```
-N-FB 铁矿→北港仓      →  N-FB03 铁矿→北港仓
-NW-TB 北港仓⇄西山仓   →  NW-TB01 北港仓⇄西山仓
-NW-PR 北港→西山       →  NW-PR01 北港→西山
+N-FB Iron Mine→North Hub     →  N-FB03 Iron Mine→North Hub
+NW-TB North Hub⇄West Hub     →  NW-TB01 North Hub⇄West Hub
+NW-PR North→West             →  NW-PR01 North→West
 ```
 
-大约每 120 个模拟步，mod 扫描一次你的线路：
-- 名字有前缀但没编号：补上该前缀下一个可用编号（两位数）。
-- 名字有前缀：把颜色校正为对应的颜色。
-- 名字没有前缀（例如游戏默认名）：不改动。
+About every 120 simulation steps the mod scans your lines:
+- Prefix without a number: adds the next free two-digit number for that prefix.
+- Any prefix: sets the matching color.
+- No prefix (for example the game's default names): left alone.
 
-| 位置 | 取值 |
+Any text after the prefix is kept as you typed it, in any language.
+
+| Part | Values |
 |---|---|
-| 区域 | 大写字母，如 N、W、NW；直达线可用 D |
-| 角色 | T 干线（枢纽⇄枢纽）、F 支线（进出枢纽）、D 直达（不经仓库） |
-| 品类 | L 液体、B 散装、P 平板、G 成品、U 通用 |
-| 客运 | `区域-P方式`，方式为 R 铁路、B 巴士、T 电车、A 航空、S 客船、H 直升机 |
+| Region | Capital letters such as N, W, NW. Direct lines can use D |
+| Role | T trunk (hub ⇄ hub), F feeder (to or from a hub), D direct (no warehouse) |
+| Category | L liquid, B bulk, P flatbed, G goods, U universal |
+| Passenger | `Region-P` + mode: R rail, B bus, T tram, A air, S ship, H helicopter |
 
-颜色与网页版“TF3 线路命名台”一致：同一品类中，干线最深、直达居中、支线最浅。
+Colors match what is carried: liquid (oil) is black-violet, bulk (coal, ore) is earth brown, flatbed (steel, timber) is rust red, goods are freight blue, universal is grey, and every passenger line is green with one shade per mode. Within a category, trunk is darkest, direct is medium and feeder is lightest. The web tool `tools/line-namer.html` uses the same palette.
 
-## 本地测试
+## Languages
 
-1. 把整个 `saige_line_namer` 文件夹复制到：
-   `C:\Program Files (x86)\Steam\userdata\<你的 Steam ID>\3493540\local\staging_area\`
-   （也可以在主菜单 设置 > 高级 > 打开用户数据文件夹 找到）
-2. 新建一局游戏，在 mod 列表里勾选“Line Namer”。mod 是按存档启用的。
-3. 建一条线路，名字写成 `N-FB 测试`，几秒后应该变成 `N-FB01 测试`，颜色变成浅橙色。
-4. 在 Mod Hub 的 My Mods 里运行验证，并导出报告。
+The Mod Hub name, summary and description come in English and Chinese through `localization` in `_metadata/modinfo.json`. The mod shows no other text in game.
 
-## 需要在游戏里确认的地方
+## Testing locally
 
-这些写法来自官方文档，但文档没有给出完整说明，第一次测试时请重点留意：
+1. Copy the whole `saige_line_namer` folder to
+   `C:\Program Files (x86)\Steam\userdata\<Steam ID>\3493540\local\staging_area\`
+   (or open it from the main menu: Settings > Advanced > Open User Data Folder).
+2. Start a new game and enable "Line Namer" in the mod list. Mods are enabled per save.
+3. Create a line named `N-FB test`. After a few seconds it should become `N-FB01 test` with a light orange color.
+4. In Mod Hub > My Mods, run the validator and export the report.
 
-1. **脚本引用路径**：`line_namer.gs.lua` 里写的是 `saige_line_namer::/line_namer/line_namer.script@update`，格式参照官方 mod 的钩子写法。如果游戏没有加载脚本，先查这里。
-2. **颜色构造**：用的是 `api.type.Vec3f.new(r, g, b)`（0 到 1 之间）。文档只确认了 `api.type.X.new()` 这种模式，没有单独列出 Vec3f。
-3. **读取颜色**：假设 `COLOR` 组件的 `color` 字段带 `.x .y .z`。如果读取失败，mod 每轮都会重新设置颜色，虽然不影响结果，但会多发命令。
-4. **游戏脚本是否自动加载**：文档说 `.gs.lua` 会被 gameScript 过滤器当作资源加载，目录位置不限，但没有给出 mod 注册脚本的完整示例。
+## Check in game
 
-出错时 mod 会停止运行，并在日志里打印 `[saige_line_namer] disabled after error: ...`，不会反复报错刷屏。把这行发给我就能定位问题。
+These calls follow the official docs, but the docs do not show them in full. Watch them on the first test:
 
-## 发布
+1. **Script path**: `line_namer.gs.lua` uses `saige_line_namer::/line_namer/line_namer.script@update`, following the hook format of the official mods. If the script does not load, check this first.
+2. **Color value**: built with `api.type.Vec3f.new(r, g, b)` on a 0 to 1 scale. The docs confirm the `api.type.X.new()` pattern but do not list Vec3f.
+3. **Reading color**: assumes the `COLOR` component's `color` field has `.x .y .z`. If reading fails, the mod sets the color again on every scan. The result is the same, it just sends extra commands.
+4. **Chinese language code**: `modinfo.json` uses `zh` for the Chinese text. If Mod Hub still shows English with the game set to Chinese, the game may expect another code.
 
-在 Mod Hub 的 My Mods 里选中这个 mod，点左下角的 Upload，mod 会上传到 mod.io。每次更新前，先把 `mod.json` 里的 `revision` 加 1。
+On an error the mod stops and logs `[saige_line_namer] disabled after error: ...` once instead of flooding the log.
+
+## Publishing
+
+In Mod Hub > My Mods, select the mod and click Upload at the bottom left. It uploads to mod.io. Bump `revision` in `mod.json` before each update.

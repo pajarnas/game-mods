@@ -21,18 +21,24 @@
   --bg:#141816; --panel:#1D2220; --ink:#E6EAE7; --muted:#97A19B; --line:#323A36;
   --accent:#F2B634; --accent-ink:#141816; --warn:#E58A4E; --ok:#5DBB84; color-scheme:dark}
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px 48px}
 .wrap{max-width:1180px;margin:0 auto;display:grid;gap:24px}
 header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px;border-bottom:3px solid var(--ink);padding-bottom:12px}
+.htxt{min-width:0}
 h1{font-family:var(--display);font-weight:800;font-size:clamp(26px,4vw,38px);letter-spacing:-.01em;margin:0;text-wrap:balance}
 .sub{color:var(--muted);margin:4px 0 0;font-size:14px}
+.hright{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
 .fmt{font-family:var(--mono);font-size:13px;background:var(--ink);color:var(--bg);padding:6px 10px;border-radius:3px;white-space:nowrap}
+.lang{display:flex;border:1px solid var(--ink);border-radius:4px;overflow:hidden}
+.lang button{font:inherit;font-size:13px;font-weight:700;padding:5px 10px;border:none;background:var(--panel);color:var(--ink);cursor:pointer}
+.lang button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
 .grid{display:grid;grid-template-columns:minmax(0,380px) minmax(0,1fr);gap:24px;align-items:start}
 @media (max-width:860px){.grid{grid-template-columns:minmax(0,1fr)}}
 .panel{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:20px;display:grid;gap:16px;min-width:0}
 h2{font-family:var(--display);font-size:13px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;margin:0;color:var(--muted)}
-label{display:grid;gap:6px;font-size:13px;font-weight:600}
+label,.flabel{display:grid;gap:6px;font-size:13px;font-weight:600}
 input,select{font:inherit;font-size:15px;padding:9px 10px;border:1px solid var(--line);border-radius:4px;background:var(--bg);color:var(--ink);width:100%}
 input:focus,select:focus,button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
 .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -40,7 +46,7 @@ input:focus,select:focus,button:focus-visible{outline:2px solid var(--accent);ou
 .seg button{font:inherit;font-size:13px;font-weight:600;padding:6px 10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:4px;cursor:pointer;display:flex;align-items:center;gap:6px}
 .seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 .dot{width:10px;height:10px;border-radius:50%;flex:none;border:1px solid rgba(128,128,128,.4)}
-.hint{font-size:12px;color:var(--muted)}
+.hint{font-size:12px;color:var(--muted);font-weight:400}
 .preview{border:2px dashed var(--line);border-radius:6px;padding:16px;display:grid;gap:10px}
 .badge{display:inline-flex;align-items:center;gap:10px;font-family:var(--mono);font-weight:700;font-size:20px}
 .chip{padding:4px 10px;border-radius:4px;min-width:84px;text-align:center}
@@ -75,144 +81,204 @@ td.code{font-family:var(--mono);font-weight:700;white-space:nowrap}
 
 <div class="wrap">
   <header>
-    <div>
-      <h1>TF3 线路命名台</h1>
-      <p class="sub">颜色编码货物品类，名字编码拓扑位置。填起终点，自动出名字、编号和颜色。</p>
+    <div class="htxt">
+      <h1 data-i18n="title">TF3 线路命名台</h1>
+      <p class="sub" data-i18n="subtitle"></p>
     </div>
-    <div class="fmt">[区域]-[角色][品类][编号] 起点→终点</div>
+    <div class="hright">
+      <div class="fmt" data-i18n="format"></div>
+      <div class="lang" role="group" aria-label="Language">
+        <button type="button" data-lang="zh" aria-pressed="false">中文</button>
+        <button type="button" data-lang="en" aria-pressed="false">EN</button>
+      </div>
+    </div>
   </header>
 
   <div class="grid">
-    <section class="panel" aria-label="新建线路">
-      <h2>新建线路</h2>
+    <section class="panel" data-i18n-aria="newLine">
+      <h2 data-i18n="newLine"></h2>
 
-      <div style="display:grid;gap:8px">
-        <span style="font-size:13px;font-weight:600">类型</span>
+      <div class="flabel">
+        <span data-i18n="type"></span>
         <div class="seg" id="kindSeg">
-          <button type="button" data-v="cargo" aria-pressed="true">货运</button>
-          <button type="button" data-v="pax" aria-pressed="false">客运</button>
+          <button type="button" data-v="cargo" aria-pressed="true" data-i18n="cargoKind"></button>
+          <button type="button" data-v="pax" aria-pressed="false" data-i18n="paxKind"></button>
         </div>
       </div>
 
       <div class="row">
-        <label>起点<input id="origin" placeholder="铁矿 / 北港仓"></label>
-        <label>终点<input id="dest" placeholder="钢厂 / 西山市"></label>
+        <label><span data-i18n="origin"></span><input id="origin" data-i18n-ph="originPh"></label>
+        <label><span data-i18n="dest"></span><input id="dest" data-i18n-ph="destPh"></label>
       </div>
 
       <div id="cargoBox" style="display:grid;gap:16px">
-        <label>货物<input id="cargo" placeholder="原油、煤、木板、家具…"><span class="hint" id="detectHint">输入货物名会自动判断品类</span></label>
-        <div style="display:grid;gap:8px">
-          <span style="font-size:13px;font-weight:600">品类</span>
+        <label><span data-i18n="cargo"></span><input id="cargo" data-i18n-ph="cargoPh"><span class="hint" id="detectHint"></span></label>
+        <div class="flabel">
+          <span data-i18n="category"></span>
           <div class="seg" id="catSeg"></div>
         </div>
-        <div style="display:grid;gap:8px">
-          <span style="font-size:13px;font-weight:600">角色</span>
+        <div class="flabel">
+          <span data-i18n="role"></span>
           <div class="seg" id="roleSeg"></div>
           <span class="hint" id="roleHint"></span>
         </div>
       </div>
 
       <div id="paxBox" style="display:none;gap:16px">
-        <div style="display:grid;gap:8px">
-          <span style="font-size:13px;font-weight:600">交通方式</span>
+        <div class="flabel">
+          <span data-i18n="mode"></span>
           <div class="seg" id="modeSeg"></div>
         </div>
       </div>
 
       <div class="row">
-        <label>区域代码<input id="region" maxlength="4" placeholder="N"></label>
-        <label id="region2Lbl">对端区域（干线）<input id="region2" maxlength="4" placeholder="W"></label>
+        <label><span data-i18n="region"></span><input id="region" maxlength="4" placeholder="N"></label>
+        <label id="region2Lbl"><span data-i18n="region2"></span><input id="region2" maxlength="4" placeholder="W"></label>
       </div>
 
       <div class="preview" aria-live="polite">
-        <div class="badge"><span class="chip" id="pChip">N-FB01</span></div>
-        <div class="pname" id="pName">N-FB01 铁矿→北港仓</div>
-        <div class="meta"><span id="pHex">#E0A35C</span><span id="pDesc">散装 · 支线</span></div>
+        <div class="badge"><span class="chip" id="pChip"></span></div>
+        <div class="pname" id="pName"></div>
+        <div class="meta"><span id="pHex"></span><span id="pDesc"></span></div>
       </div>
 
       <div class="btns">
-        <button class="btn primary" id="addBtn" type="button">加入线路表</button>
-        <button class="btn" id="copyName" type="button">复制名字</button>
-        <button class="btn" id="copyHex" type="button">复制颜色</button>
+        <button class="btn primary" id="addBtn" type="button" data-i18n="add"></button>
+        <button class="btn" id="copyName" type="button" data-i18n="copyName"></button>
+        <button class="btn" id="copyHex" type="button" data-i18n="copyHex"></button>
       </div>
     </section>
 
-    <section class="panel" aria-label="线路表">
+    <section class="panel" data-i18n-aria="board">
       <div class="board-top">
-        <h2>线路表</h2>
+        <h2 data-i18n="board"></h2>
         <div class="btns">
-          <button class="btn" id="exportBtn" type="button">复制全部</button>
-          <button class="btn" id="resetBtn" type="button">恢复示例</button>
+          <button class="btn" id="exportBtn" type="button" data-i18n="copyAll"></button>
+          <button class="btn" id="resetBtn" type="button" data-i18n="reset"></button>
         </div>
       </div>
       <div class="stats" id="stats"></div>
       <div class="tbl">
         <table>
-          <thead><tr><th>编号</th><th>线路</th><th>货物</th><th>颜色</th><th>状态</th><th></th></tr></thead>
+          <thead><tr><th data-i18n="thCode"></th><th data-i18n="thLine"></th><th data-i18n="thCargo"></th><th data-i18n="thColor"></th><th data-i18n="thStatus"></th><th></th></tr></thead>
           <tbody id="tbody"></tbody>
         </table>
       </div>
       <div id="confirmBar" class="btns" hidden>
-        <span style="align-self:center;font-size:13px">清空当前表并恢复示例？</span>
-        <button class="btn primary" id="confirmYes" type="button">确认恢复</button>
-        <button class="btn" id="confirmNo" type="button">取消</button>
+        <span style="align-self:center;font-size:13px" data-i18n="resetAsk"></span>
+        <button class="btn primary" id="confirmYes" type="button" data-i18n="resetYes"></button>
+        <button class="btn" id="confirmNo" type="button" data-i18n="cancel"></button>
       </div>
 
-      <h2 style="margin-top:8px">色板</h2>
+      <h2 style="margin-top:8px" data-i18n="palette"></h2>
       <div class="legend" id="legend"></div>
-      <p class="hint" style="margin:0">同一色系里，干线最深、直达居中、支线最浅。白灰色的通用线越多，说明越该拆专用仓和专用车了。数据只存在你这个浏览器里。</p>
+      <p class="hint" style="margin:0" data-i18n="paletteNote"></p>
     </section>
   </div>
 </div>
 <div class="toast" id="toast" role="status"></div>
 
 <script>
+const I18N = {
+  zh:{
+    title:"TF3 线路命名台", subtitle:"颜色编码货物品类，名字编码拓扑位置。填起终点，自动出名字、编号和颜色。",
+    format:"[区域]-[角色][品类][编号] 起点→终点", newLine:"新建线路", type:"类型", cargoKind:"货运", paxKind:"客运",
+    origin:"起点", dest:"终点", originPh:"铁矿 / 北港仓", destPh:"钢厂 / 西山市", cargo:"货物", cargoPh:"原油、煤、木板、家具…",
+    category:"品类", role:"角色", mode:"交通方式", region:"区域代码", region2:"对端区域（干线）",
+    add:"加入线路表", copyName:"复制名字", copyHex:"复制颜色", board:"线路表", copyAll:"复制全部", reset:"恢复示例",
+    thCode:"编号", thLine:"线路", thCargo:"货物", thColor:"颜色", thStatus:"状态",
+    resetAsk:"清空当前表并恢复示例？", resetYes:"确认恢复", cancel:"取消", palette:"色板",
+    paletteNote:"颜色跟运输内容有联想：油是黑紫色，煤和矿是土棕色，钢材木材是铁锈红，成品是海运蓝，客运全是绿色。同一色系里，干线最深、直达居中、支线最浅。灰白色的通用线越多，说明越该拆专用仓和专用车了。数据只存在你这个浏览器里。",
+    detectIdle:"输入货物名会自动判断品类", detectHit:c=>`判断为 ${c}，可手动改`, detectMiss:"没认出来，请手动选品类",
+    cats:{L:"液体",B:"散装",P:"平板",G:"成品",U:"通用"},
+    roles:{T:"干线",D:"直达",F:"支线"},
+    roleHints:{T:"枢纽⇄枢纽，大车低频，两端都应是仓库",D:"产地直接送消费者，不经仓库，链条最短",F:"产地或城市 ⇄ 本区域枢纽，小车高频"},
+    modes:{R:"城际铁路",S:"客船",A:"航空",B:"市内巴士",T:"电车",H:"直升机"},
+    paxWord:"客运", tagPax:"客运", tagUniversal:"待专业化", tagTrunk:"干线两端非仓库?", tagOk:"正常",
+    hubWords:/仓|港|枢纽/,
+    empty:"还没有线路。在左边填起终点，点“加入线路表”。",
+    statTotal:n=>`共 ${n} 条`, statT:n=>`干线 ${n}`, statF:n=>`支线 ${n}`, statD:n=>`直达 ${n}`, statPax:n=>`客运 ${n}`, statU:n=>`通用 ${n}`,
+    legendRow:(k,n)=>`<b>${k}</b> ${n} · 干/直/支`, legendPax:"<b>P</b> 客运 · 铁/船/空/巴/电/直",
+    tCopiedName:"名字已复制", tCopiedHex:"颜色已复制", tCopiedAll:"线路表已复制", tCopyFail:"复制失败，请手动选中",
+    tNeedEnds:"先填起点和终点", tAdded:c=>`已加入 ${c}`, tReset:"已恢复示例", del:c=>`删除 ${c}`,
+    sample:[["铁矿","北港仓","铁矿石"],["煤矿","北港仓","煤"],["北港仓","西山仓","铁矿石+煤"],["西山仓","西山市","家具"],["油田","炼油厂","原油"],["林场","西山仓","原木"],["北港","西山"]],
+    demo:["铁矿","北港仓","铁矿石"]
+  },
+  en:{
+    title:"TF3 Line Namer", subtitle:"Color encodes the cargo, the name encodes where the line sits in the network. Enter both ends and get a name, number and color.",
+    format:"[Region]-[Role][Cargo][No.] Origin→Destination", newLine:"New line", type:"Type", cargoKind:"Cargo", paxKind:"Passenger",
+    origin:"Origin", dest:"Destination", originPh:"Iron mine / North hub", destPh:"Steel mill / West town", cargo:"Cargo", cargoPh:"Crude oil, coal, planks, furniture…",
+    category:"Category", role:"Role", mode:"Mode", region:"Region code", region2:"Other region (trunk)",
+    add:"Add to board", copyName:"Copy name", copyHex:"Copy color", board:"Line board", copyAll:"Copy all", reset:"Restore examples",
+    thCode:"Code", thLine:"Line", thCargo:"Cargo", thColor:"Color", thStatus:"Status",
+    resetAsk:"Clear the board and restore the examples?", resetYes:"Restore", cancel:"Cancel", palette:"Palette",
+    paletteNote:"Colors match what is carried: oil is black-violet, coal and ore are earth brown, steel and timber are rust red, goods are freight blue, and every passenger line is green. Within a color, trunk is darkest, direct is medium and feeder is lightest. Lots of grey universal lines means it is time to add specialized warehouses and vehicles. Lines are saved in this browser only.",
+    detectIdle:"Type a cargo name to detect its category", detectHit:c=>`Detected ${c}. You can change it.`, detectMiss:"Not recognized. Pick a category.",
+    cats:{L:"Liquid",B:"Bulk",P:"Flatbed",G:"Goods",U:"Universal"},
+    roles:{T:"Trunk",D:"Direct",F:"Feeder"},
+    roleHints:{T:"Hub ⇄ hub. Big vehicles, low frequency. Both ends should be warehouses.",D:"Producer straight to consumer, no warehouse. Shortest chain.",F:"Producer or town ⇄ its regional hub. Small vehicles, high frequency."},
+    modes:{R:"Intercity rail",S:"Ferry",A:"Air",B:"Bus",T:"Tram",H:"Helicopter"},
+    paxWord:"Passenger", tagPax:"Passenger", tagUniversal:"Specialize", tagTrunk:"Trunk end not a hub?", tagOk:"OK",
+    hubWords:/hub|port|depot|warehouse|仓|港|枢纽/i,
+    empty:"No lines yet. Enter an origin and destination on the left, then select Add to board.",
+    statTotal:n=>`${n} lines`, statT:n=>`Trunk ${n}`, statF:n=>`Feeder ${n}`, statD:n=>`Direct ${n}`, statPax:n=>`Passenger ${n}`, statU:n=>`Universal ${n}`,
+    legendRow:(k,n)=>`<b>${k}</b> ${n} · trunk/direct/feeder`, legendPax:"<b>P</b> Passenger · rail/ferry/air/bus/tram/heli",
+    tCopiedName:"Name copied", tCopiedHex:"Color copied", tCopiedAll:"Board copied", tCopyFail:"Copy failed. Select the text manually.",
+    tNeedEnds:"Enter an origin and destination first", tAdded:c=>`Added ${c}`, tReset:"Examples restored", del:c=>`Delete ${c}`,
+    sample:[["Iron Mine","North Hub","Iron ore"],["Coal Mine","North Hub","Coal"],["North Hub","West Hub","Iron ore + coal"],["West Hub","West Town","Furniture"],["Oil Field","Refinery","Crude oil"],["Forest","West Hub","Logs"],["North Port","West Town"]],
+    demo:["Iron Mine","North Hub","Iron ore"]
+  }
+};
+
 const CATS = {
-  L:{name:"液体", shades:["#2B2238","#4E3D66","#9A88B8"]},
-  B:{name:"散装", shades:["#6B3A12","#B5651D","#E0A35C"]},
-  P:{name:"平板", shades:["#24405A","#4D7598","#93B4D0"]},
-  G:{name:"成品", shades:["#1F5A3A","#2E8B57","#86CDA3"]},
-  U:{name:"通用", shades:["#6E6E6E","#A8A8A8","#E2E2E2"]}
+  L:["#23202B","#4A4458","#9A93AB"],
+  B:["#6B3A12","#B5651D","#E0A35C"],
+  P:["#7A2418","#B5402C","#E89A85"],
+  G:["#1E3A8A","#2563EB","#93C5FD"],
+  U:["#6E6E6E","#A8A8A8","#E2E2E2"]
 };
-const ROLES = {
-  T:{name:"干线", idx:0, hint:"枢纽⇄枢纽，大车低频，两端都应是仓库"},
-  D:{name:"直达", idx:1, hint:"产地直接送消费者，不经仓库，链条最短"},
-  F:{name:"支线", idx:2, hint:"产地或城市 ⇄ 本区域枢纽，小车高频"}
-};
-const MODES = {
-  R:{name:"城际铁路", hex:"#C8332B"}, B:{name:"市内巴士", hex:"#2F6FD0"},
-  T:{name:"电车", hex:"#E3B505"}, A:{name:"航空", hex:"#7A4FC4"},
-  S:{name:"客船", hex:"#1C9A9A"}, H:{name:"直升机", hex:"#D0508A"}
-};
+const ROLE_IDX = {T:0, D:1, F:2};
+const MODES = {R:"#14532D", S:"#0F766E", A:"#10A37F", B:"#22A35A", T:"#6BAA1F", H:"#9ED9A8"};
 const DETECT = [
-  ["L",["原油","油","燃料","汽油","化学","化工","液","水","牛奶","酒","crude","oil","fuel","chemical","liquid"]],
-  ["B",["煤","矿","石","谷","粮","沙","黏土","粘土","砂","渣","coal","ore","stone","grain","sand","clay","gravel"]],
-  ["P",["木","板","原木","钢","铁材","玻璃","机械","管","log","plank","steel","glass","machine","timber"]],
-  ["G",["家具","食品","罐头","工具","商品","货物","衣","肉","鱼","面包","goods","food","tool","furniture","fish","meat"]]
+  ["L",["原油","油","燃料","汽油","化学","化工","液","水","牛奶","酒","crude","oil","fuel","petrol","chemical","liquid","water","milk"]],
+  ["B",["煤","矿","石","谷","粮","沙","黏土","粘土","砂","渣","coal","ore","stone","grain","sand","clay","gravel","slag"]],
+  ["P",["木","板","原木","钢","铁材","玻璃","机械","管","log","plank","steel","glass","machine","timber","lumber","pipe"]],
+  ["G",["家具","食品","罐头","工具","商品","货物","衣","肉","鱼","面包","goods","food","tool","furniture","fish","meat","bread","cloth"]]
 ];
+
+const $ = id => document.getElementById(id);
+const safe = {
+  get(k){try{return localStorage.getItem(k)}catch(e){return null}},
+  set(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+};
+let lang = safe.get("tf3lang") || ((navigator.language||"").toLowerCase().startsWith("zh") ? "zh" : "en");
+if(!I18N[lang]) lang = "en";
+const T = () => I18N[lang];
 
 const state = {kind:"cargo", cat:"B", role:"F", mode:"R", catManual:false};
-const $ = id => document.getElementById(id);
-const store = {
-  get(){try{return JSON.parse(localStorage.getItem("tf3lines")||"null")}catch(e){return null}},
-  set(v){try{localStorage.setItem("tf3lines",JSON.stringify(v))}catch(e){}}
-};
-const SAMPLE = [
-  {kind:"cargo",region:"N",role:"F",cat:"B",num:1,origin:"铁矿",dest:"北港仓",cargo:"铁矿石"},
-  {kind:"cargo",region:"N",role:"F",cat:"B",num:2,origin:"煤矿",dest:"北港仓",cargo:"煤"},
-  {kind:"cargo",region:"NW",role:"T",cat:"B",num:1,origin:"北港仓",dest:"西山仓",cargo:"铁矿石+煤"},
-  {kind:"cargo",region:"W",role:"F",cat:"G",num:1,origin:"西山仓",dest:"西山市",cargo:"家具"},
-  {kind:"cargo",region:"D",role:"D",cat:"L",num:1,origin:"油田",dest:"炼油厂",cargo:"原油"},
-  {kind:"cargo",region:"W",role:"F",cat:"U",num:1,origin:"林场",dest:"西山仓",cargo:"原木"},
-  {kind:"pax",region:"NW",mode:"R",num:1,origin:"北港",dest:"西山"}
-];
-let lines = store.get() || SAMPLE.slice();
+
+function makeSample(){
+  const s=T().sample;
+  return [
+    {kind:"cargo",region:"N",role:"F",cat:"B",num:1,origin:s[0][0],dest:s[0][1],cargo:s[0][2]},
+    {kind:"cargo",region:"N",role:"F",cat:"B",num:2,origin:s[1][0],dest:s[1][1],cargo:s[1][2]},
+    {kind:"cargo",region:"NW",role:"T",cat:"B",num:1,origin:s[2][0],dest:s[2][1],cargo:s[2][2]},
+    {kind:"cargo",region:"W",role:"F",cat:"G",num:1,origin:s[3][0],dest:s[3][1],cargo:s[3][2]},
+    {kind:"cargo",region:"D",role:"D",cat:"L",num:1,origin:s[4][0],dest:s[4][1],cargo:s[4][2]},
+    {kind:"cargo",region:"W",role:"F",cat:"U",num:1,origin:s[5][0],dest:s[5][1],cargo:s[5][2]},
+    {kind:"pax",region:"NW",mode:"R",num:1,origin:s[6][0],dest:s[6][1]}
+  ];
+}
+let lines;
+try{ lines = JSON.parse(safe.get("tf3lines")||"null"); }catch(e){ lines = null; }
+if(!Array.isArray(lines)) lines = makeSample();
+const save = () => safe.set("tf3lines", JSON.stringify(lines));
 
 function codeOf(l){
-  if(l.kind==="pax") return `${l.region}-P${l.mode}${String(l.num).padStart(2,"0")}`;
-  return `${l.region}-${l.role}${l.cat}${String(l.num).padStart(2,"0")}`;
+  const n=String(l.num).padStart(2,"0");
+  return l.kind==="pax" ? `${l.region}-P${l.mode}${n}` : `${l.region}-${l.role}${l.cat}${n}`;
 }
-function hexOf(l){ return l.kind==="pax" ? MODES[l.mode].hex : CATS[l.cat].shades[ROLES[l.role].idx]; }
+function hexOf(l){ return l.kind==="pax" ? MODES[l.mode] : CATS[l.cat][ROLE_IDX[l.role]]; }
 function fullName(l){ return `${codeOf(l)} ${l.origin||"?"}→${l.dest||"?"}`; }
 function textOn(hex){
   const n=parseInt(hex.slice(1),16),r=n>>16,g=(n>>8)&255,b=n&255;
@@ -225,9 +291,9 @@ function regionCode(){
   if((state.kind==="pax" || state.role==="T") && b) return [a,b].sort().join("");
   return a;
 }
-function nextNum(draft){
-  const same = lines.filter(l=>l.kind===draft.kind && l.region===draft.region &&
-    (draft.kind==="pax" ? l.mode===draft.mode : (l.role===draft.role && l.cat===draft.cat)));
+function nextNum(d){
+  const same = lines.filter(l=>l.kind===d.kind && l.region===d.region &&
+    (d.kind==="pax" ? l.mode===d.mode : (l.role===d.role && l.cat===d.cat)));
   return same.reduce((m,l)=>Math.max(m,l.num),0)+1;
 }
 function draft(){
@@ -241,110 +307,122 @@ function detect(txt){
   return null;
 }
 
-function seg(el, items, key, onPick){
+function buildSeg(el, keys, key, label, color, onPick){
   el.innerHTML="";
-  for(const [k,v] of Object.entries(items)){
+  for(const k of keys){
     const b=document.createElement("button"); b.type="button"; b.dataset.v=k;
-    const hex = v.shades ? v.shades[1] : v.hex;
-    b.innerHTML = hex ? `<span class="dot" style="background:${hex}"></span>${k} ${v.name}` : `${k} ${v.name}`;
-    b.setAttribute("aria-pressed", String(state[key]===k));
+    const hex=color?color(k):null;
+    b.innerHTML=(hex?`<span class="dot" style="background:${hex}"></span>`:"")+`${k} ${label(k)}`;
     b.onclick=()=>{state[key]=k; onPick&&onPick(); refreshSegs(); render();};
     el.appendChild(b);
   }
+}
+function buildSegs(){
+  buildSeg($("catSeg"),Object.keys(CATS),"cat",k=>T().cats[k],k=>CATS[k][1],()=>{state.catManual=true});
+  buildSeg($("roleSeg"),["T","D","F"],"role",k=>T().roles[k]);
+  buildSeg($("modeSeg"),Object.keys(MODES),"mode",k=>T().modes[k],k=>MODES[k]);
 }
 function refreshSegs(){
   for(const [id,key] of [["catSeg","cat"],["roleSeg","role"],["modeSeg","mode"],["kindSeg","kind"]])
     $(id).querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.v===state[key])));
   $("cargoBox").style.display = state.kind==="cargo"?"grid":"none";
   $("paxBox").style.display = state.kind==="pax"?"grid":"none";
-  $("roleHint").textContent = ROLES[state.role].hint;
+  $("roleHint").textContent = T().roleHints[state.role];
   const needs2 = state.kind==="pax" || state.role==="T";
   $("region2Lbl").style.opacity = needs2?1:.45;
   $("region").disabled = state.kind==="cargo" && state.role==="D";
 }
 
 function render(){
-  const d=draft(), hex=hexOf(d);
+  const d=draft(), hex=hexOf(d), t=T();
   const chip=$("pChip"); chip.textContent=codeOf(d); chip.style.background=hex; chip.style.color=textOn(hex);
   $("pName").textContent=fullName(d);
   $("pHex").textContent=hex;
-  $("pDesc").textContent = d.kind==="pax" ? `客运 · ${MODES[d.mode].name}` : `${CATS[d.cat].name} · ${ROLES[d.role].name}`;
+  $("pDesc").textContent = d.kind==="pax" ? `${t.paxWord} · ${t.modes[d.mode]}` : `${t.cats[d.cat]} · ${t.roles[d.role]}`;
   renderTable();
 }
-
 function status(l){
-  if(l.kind==="pax") return `<span class="tag ok">客运</span>`;
-  if(l.cat==="U") return `<span class="tag warn">待专业化</span>`;
-  if(l.role==="T" && !/仓|港|枢纽|hub/i.test(l.origin+l.dest)) return `<span class="tag warn">干线两端非仓库?</span>`;
-  return `<span class="tag ok">正常</span>`;
+  const t=T();
+  if(l.kind==="pax") return `<span class="tag ok">${t.tagPax}</span>`;
+  if(l.cat==="U") return `<span class="tag warn">${t.tagUniversal}</span>`;
+  if(l.role==="T" && !t.hubWords.test(l.origin+l.dest)) return `<span class="tag warn">${t.tagTrunk}</span>`;
+  return `<span class="tag ok">${t.tagOk}</span>`;
 }
+function esc(s){return String(s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
 function renderTable(){
-  const tb=$("tbody"); tb.innerHTML="";
-  if(!lines.length){tb.innerHTML=`<tr><td colspan="6" class="empty">还没有线路。在左边填起终点，点“加入线路表”。</td></tr>`;}
-  const sorted=[...lines].sort((a,b)=>codeOf(a).localeCompare(codeOf(b)));
-  sorted.forEach(l=>{
+  const t=T(), tb=$("tbody"); tb.innerHTML="";
+  if(!lines.length) tb.innerHTML=`<tr><td colspan="6" class="empty">${t.empty}</td></tr>`;
+  [...lines].sort((a,b)=>codeOf(a).localeCompare(codeOf(b))).forEach(l=>{
     const hex=hexOf(l), tr=document.createElement("tr");
     tr.innerHTML=`<td class="code"><span class="stripe" style="background:${hex}"></span>${codeOf(l)}</td>
       <td>${esc(l.origin)}→${esc(l.dest)}</td>
-      <td>${l.kind==="pax"?MODES[l.mode].name:esc(l.cargo||CATS[l.cat].name)}</td>
+      <td>${l.kind==="pax"?t.modes[l.mode]:esc(l.cargo||t.cats[l.cat])}</td>
       <td style="font-family:var(--mono);font-size:12px">${hex}</td>
       <td>${status(l)}</td>
-      <td><button class="x" aria-label="删除 ${codeOf(l)}">✕</button></td>`;
-    tr.querySelector(".x").onclick=()=>{lines=lines.filter(x=>x!==l);store.set(lines);render();};
+      <td><button class="x" aria-label="${esc(t.del(codeOf(l)))}">✕</button></td>`;
+    tr.querySelector(".x").onclick=()=>{lines=lines.filter(x=>x!==l);save();render();};
     tb.appendChild(tr);
   });
-  const c=lines.filter(l=>l.kind==="cargo"), u=c.filter(l=>l.cat==="U").length;
-  const by=r=>c.filter(l=>l.role===r).length;
-  $("stats").innerHTML=`<span class="pill">共 ${lines.length} 条</span><span class="pill">干线 ${by("T")}</span><span class="pill">支线 ${by("F")}</span><span class="pill">直达 ${by("D")}</span><span class="pill">客运 ${lines.length-c.length}</span>`+(u?`<span class="pill warn">通用 ${u}</span>`:"");
+  const c=lines.filter(l=>l.kind==="cargo"), u=c.filter(l=>l.cat==="U").length, by=r=>c.filter(l=>l.role===r).length;
+  $("stats").innerHTML=`<span class="pill">${t.statTotal(lines.length)}</span><span class="pill">${t.statT(by("T"))}</span><span class="pill">${t.statF(by("F"))}</span><span class="pill">${t.statD(by("D"))}</span><span class="pill">${t.statPax(lines.length-c.length)}</span>`+(u?`<span class="pill warn">${t.statU(u)}</span>`:"");
 }
-function esc(s){return String(s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
-
 function legend(){
-  const el=$("legend");
-  for(const [k,v] of Object.entries(CATS))
-    el.insertAdjacentHTML("beforeend",`<div class="lg"><div class="sw">${v.shades.map(h=>`<span style="background:${h}"></span>`).join("")}</div><span><b>${k}</b> ${v.name} · 干/直/支</span></div>`);
-  el.insertAdjacentHTML("beforeend",`<div class="lg"><div class="sw">${Object.values(MODES).map(m=>`<span style="background:${m.hex}"></span>`).join("")}</div><span><b>P</b> 客运 · 铁/巴/电/空/船/直</span></div>`);
+  const t=T(), el=$("legend"); el.innerHTML="";
+  for(const k of Object.keys(CATS))
+    el.insertAdjacentHTML("beforeend",`<div class="lg"><div class="sw">${CATS[k].map(h=>`<span style="background:${h}"></span>`).join("")}</div><span>${t.legendRow(k,t.cats[k])}</span></div>`);
+  el.insertAdjacentHTML("beforeend",`<div class="lg"><div class="sw">${Object.values(MODES).map(h=>`<span style="background:${h}"></span>`).join("")}</div><span>${t.legendPax}</span></div>`);
+}
+function updateDetectHint(){
+  const t=T(), v=$("cargo").value, c=detect(v);
+  $("detectHint").textContent = !v ? t.detectIdle : (c ? t.detectHit(t.cats[c]) : t.detectMiss);
+}
+function applyLang(){
+  const t=T();
+  document.documentElement.lang = lang==="zh" ? "zh-CN" : "en";
+  document.title = t.title;
+  document.querySelectorAll("[data-i18n]").forEach(el=>{el.textContent=t[el.dataset.i18n]});
+  document.querySelectorAll("[data-i18n-ph]").forEach(el=>{el.placeholder=t[el.dataset.i18nPh]});
+  document.querySelectorAll("[data-i18n-aria]").forEach(el=>{el.setAttribute("aria-label",t[el.dataset.i18nAria])});
+  document.querySelectorAll(".lang button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.lang===lang)));
+  buildSegs(); legend(); updateDetectHint(); refreshSegs(); render();
 }
 
-let tt; function toast(m){const t=$("toast");t.textContent=m;t.classList.add("on");clearTimeout(tt);tt=setTimeout(()=>t.classList.remove("on"),1600);}
+let tt; function toast(m){const el=$("toast");el.textContent=m;el.classList.add("on");clearTimeout(tt);tt=setTimeout(()=>el.classList.remove("on"),1600);}
 function copy(text,msg){
-  if(navigator.clipboard&&navigator.clipboard.writeText){
-    navigator.clipboard.writeText(text).then(()=>toast(msg),()=>fallback(text,msg));
-  } else fallback(text,msg);
+  if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(()=>toast(msg),()=>fallback(text,msg));
+  else fallback(text,msg);
 }
 function fallback(text,msg){
   const ta=document.createElement("textarea");ta.value=text;document.body.appendChild(ta);ta.select();
-  try{document.execCommand("copy");toast(msg)}catch(e){toast("复制失败，请手动选中")}
+  try{document.execCommand("copy");toast(msg)}catch(e){toast(T().tCopyFail)}
   ta.remove();
 }
 
-seg($("catSeg"),CATS,"cat",()=>{state.catManual=true});
-seg($("roleSeg"),ROLES,"role");
-seg($("modeSeg"),MODES,"mode");
+document.querySelectorAll(".lang button").forEach(b=>b.onclick=()=>{lang=b.dataset.lang;safe.set("tf3lang",lang);applyLang();});
 $("kindSeg").querySelectorAll("button").forEach(b=>b.onclick=()=>{state.kind=b.dataset.v;refreshSegs();render();});
 ["origin","dest","region","region2"].forEach(id=>$(id).addEventListener("input",render));
 $("cargo").addEventListener("input",e=>{
   const c=detect(e.target.value);
-  if(c && !state.catManual){state.cat=c;$("detectHint").textContent=`判断为 ${CATS[c].name}，可手动改`;}
-  else if(!e.target.value){state.catManual=false;$("detectHint").textContent="输入货物名会自动判断品类";}
-  else if(!c){$("detectHint").textContent="没认出来，请手动选品类";}
-  refreshSegs();render();
+  if(!e.target.value) state.catManual=false;
+  else if(c && !state.catManual) state.cat=c;
+  updateDetectHint(); refreshSegs(); render();
 });
 $("addBtn").onclick=()=>{
   const d=draft();
-  if(!d.origin||!d.dest){toast("先填起点和终点");return;}
-  lines.push(d);store.set(lines);
+  if(!d.origin||!d.dest){toast(T().tNeedEnds);return;}
+  lines.push(d);save();
   ["origin","dest","cargo"].forEach(id=>$(id).value="");state.catManual=false;
-  $("detectHint").textContent="输入货物名会自动判断品类";
-  render();toast(`已加入 ${codeOf(d)}`);
+  updateDetectHint();render();toast(T().tAdded(codeOf(d)));
 };
-$("copyName").onclick=()=>copy(fullName(draft()),"名字已复制");
-$("copyHex").onclick=()=>copy(hexOf(draft()),"颜色已复制");
-$("exportBtn").onclick=()=>copy([...lines].sort((a,b)=>codeOf(a).localeCompare(codeOf(b))).map(l=>`${fullName(l)}\t${hexOf(l)}`).join("\n"),"线路表已复制");
+$("copyName").onclick=()=>copy(fullName(draft()),T().tCopiedName);
+$("copyHex").onclick=()=>copy(hexOf(draft()),T().tCopiedHex);
+$("exportBtn").onclick=()=>copy([...lines].sort((a,b)=>codeOf(a).localeCompare(codeOf(b))).map(l=>`${fullName(l)}\t${hexOf(l)}`).join("\n"),T().tCopiedAll);
 $("resetBtn").onclick=()=>{$("confirmBar").hidden=false};
 $("confirmNo").onclick=()=>{$("confirmBar").hidden=true};
-$("confirmYes").onclick=()=>{lines=SAMPLE.slice();store.set(lines);$("confirmBar").hidden=true;render();toast("已恢复示例");};
+$("confirmYes").onclick=()=>{lines=makeSample();save();$("confirmBar").hidden=true;render();toast(T().tReset);};
 
-$("origin").value="铁矿";$("dest").value="北港仓";$("cargo").value="铁矿石";$("region").value="N";$("region2").value="W";
-legend();refreshSegs();render();
+const demo=T().demo;
+$("origin").value=demo[0];$("dest").value=demo[1];$("cargo").value=demo[2];$("region").value="N";$("region2").value="W";
+state.cat=detect(demo[2])||"B";
+applyLang();
 </script>

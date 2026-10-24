@@ -1,9 +1,11 @@
 # Transport Fever 3
 
+English | [简体中文](README.zh-CN.md)
+
 | Folder | Status | Notes |
 |---|---|---|
 | `saige_line_namer/` | Draft, not yet tested in game | Script mod. See its README for usage and the points to verify. |
-| `tools/line-namer.html` | Working | Open in a browser. Lines are saved in that browser only. |
+| `tools/line-namer.html` | Working | Open in a browser. Chinese and English, follows the browser language. Lines are saved in that browser only. |
 
 ## Local testing
 
