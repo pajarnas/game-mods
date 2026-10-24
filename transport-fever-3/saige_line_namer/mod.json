@@ -1,8 +1,19 @@
 {
-  "modId": "saige_line_namer",
-  "revision": 1,
-  "severityAdd": "None",
-  "severityRemove": "None",
-  "cosmetic": false,
-  "visible": true
+    "dependencies": null,
+    "incompatibilities": null,
+    "modId": "saige_line_namer",
+    "options": null,
+    "params": null,
+    "postRunScript": {
+        "fileName": ""
+    },
+    "preRunScript": {
+        "fileName": ""
+    },
+    "revision": 2,
+    "runScript": {
+        "fileName": ""
+    },
+    "severityAdd": "None",
+    "severityRemove": "None"
 }
