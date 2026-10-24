@@ -1,0 +1,16 @@
+{
+  "name": "Line Namer",
+  "summary": "Type a line prefix like N-FB and the line gets the next number and a cargo-coded color.",
+  "description": "Name a line with a prefix such as 'N-FB Iron Mine -> North Hub' and this mod fills in the next free number (N-FB03) and sets the line color.\n\nFormat: [Region]-[Role][Category][Number] Origin -> Destination\nRole: T trunk (hub to hub), F feeder (to or from a hub), D direct (no warehouse).\nCategory: L liquid, B bulk, P flatbed, G goods, U universal.\nPassenger lines: [Region]-P[Mode], with mode R rail, B bus, T tram, A air, S ship, H helicopter.\n\nColors follow the cargo category. Within a category, trunk lines are darkest, direct lines medium and feeder lines lightest. Lines whose names do not start with a prefix are left alone.",
+  "authors": [
+    { "name": "Saige", "role": "CREATOR" }
+  ],
+  "tags": ["Script Mod"],
+  "localization": {
+    "zh": {
+      "name": "线路命名台",
+      "summary": "给线路起名时只写前缀（如 N-FB），自动补编号并按货物品类上色。",
+      "description": "给线路起名时写成「N-FB 铁矿→北港仓」，mod 会自动补上下一个可用编号（N-FB03）并设置线路颜色。\n\n格式：[区域]-[角色][品类][编号] 起点→终点\n角色：T 干线（枢纽⇄枢纽），F 支线（进出枢纽），D 直达（不经仓库）。\n品类：L 液体，B 散装，P 平板，G 成品，U 通用。\n客运线：[区域]-P[方式]，方式 R 铁路，B 巴士，T 电车，A 航空，S 客船，H 直升机。\n\n颜色按货物品类区分；同一品类中，干线最深、直达居中、支线最浅。名字不以前缀开头的线路不会被改动。"
+    }
+  }
+}

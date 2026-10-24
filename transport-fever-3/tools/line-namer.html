@@ -1,0 +1,350 @@
+<!doctype html>
+<html lang="zh">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>TF3 线路命名台</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Overpass:wght@400;600;800&family=JetBrains+Mono:wght@500;700&family=Noto+Sans+SC:wght@400;600&display=swap">
+<style>
+/* Layout: signal-box console — builder panel on the left, live line board on the right, stacking on phones */
+:root{
+  --bg:#EEF0EC; --panel:#FFFFFF; --ink:#1C211F; --muted:#5E6762; --line:#D3D8D3;
+  --accent:#E8A317; --accent-ink:#1C211F; --warn:#B4531A; --ok:#2E7D4F;
+  --display:"Overpass","Noto Sans SC",system-ui,sans-serif;
+  --body:"Noto Sans SC","Overpass",system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#141816; --panel:#1D2220; --ink:#E6EAE7; --muted:#97A19B; --line:#323A36;
+  --accent:#F2B634; --accent-ink:#141816; --warn:#E58A4E; --ok:#5DBB84; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141816; --panel:#1D2220; --ink:#E6EAE7; --muted:#97A19B; --line:#323A36;
+  --accent:#F2B634; --accent-ink:#141816; --warn:#E58A4E; --ok:#5DBB84; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px 48px}
+.wrap{max-width:1180px;margin:0 auto;display:grid;gap:24px}
+header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px;border-bottom:3px solid var(--ink);padding-bottom:12px}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(26px,4vw,38px);letter-spacing:-.01em;margin:0;text-wrap:balance}
+.sub{color:var(--muted);margin:4px 0 0;font-size:14px}
+.fmt{font-family:var(--mono);font-size:13px;background:var(--ink);color:var(--bg);padding:6px 10px;border-radius:3px;white-space:nowrap}
+.grid{display:grid;grid-template-columns:minmax(0,380px) minmax(0,1fr);gap:24px;align-items:start}
+@media (max-width:860px){.grid{grid-template-columns:minmax(0,1fr)}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:20px;display:grid;gap:16px;min-width:0}
+h2{font-family:var(--display);font-size:13px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;margin:0;color:var(--muted)}
+label{display:grid;gap:6px;font-size:13px;font-weight:600}
+input,select{font:inherit;font-size:15px;padding:9px 10px;border:1px solid var(--line);border-radius:4px;background:var(--bg);color:var(--ink);width:100%}
+input:focus,select:focus,button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button{font:inherit;font-size:13px;font-weight:600;padding:6px 10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:4px;cursor:pointer;display:flex;align-items:center;gap:6px}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.dot{width:10px;height:10px;border-radius:50%;flex:none;border:1px solid rgba(128,128,128,.4)}
+.hint{font-size:12px;color:var(--muted)}
+.preview{border:2px dashed var(--line);border-radius:6px;padding:16px;display:grid;gap:10px}
+.badge{display:inline-flex;align-items:center;gap:10px;font-family:var(--mono);font-weight:700;font-size:20px}
+.chip{padding:4px 10px;border-radius:4px;min-width:84px;text-align:center}
+.pname{font-family:var(--display);font-weight:600;font-size:17px;word-break:break-word}
+.meta{display:flex;flex-wrap:wrap;gap:8px;font-family:var(--mono);font-size:12px;color:var(--muted)}
+.btn{font:inherit;font-weight:700;padding:10px 14px;border-radius:4px;border:1px solid var(--ink);background:var(--panel);color:var(--ink);cursor:pointer}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btns{display:flex;flex-wrap:wrap;gap:8px}
+.board-top{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px}
+.stats{display:flex;flex-wrap:wrap;gap:6px}
+.pill{font-size:12px;font-weight:600;padding:3px 9px;border-radius:999px;border:1px solid var(--line);font-variant-numeric:tabular-nums}
+.pill.warn{border-color:var(--warn);color:var(--warn)}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:560px;font-size:14px}
+th{text-align:left;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:700;padding:8px;border-bottom:2px solid var(--ink)}
+td{padding:9px 8px;border-bottom:1px solid var(--line);vertical-align:middle}
+td.code{font-family:var(--mono);font-weight:700;white-space:nowrap}
+.stripe{display:inline-block;width:6px;height:22px;border-radius:2px;vertical-align:middle;margin-right:8px}
+.tag{font-size:11px;font-weight:700;padding:2px 7px;border-radius:3px;border:1px solid currentColor;white-space:nowrap}
+.tag.warn{color:var(--warn)} .tag.ok{color:var(--ok)}
+.x{background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:4px 8px}
+.x:hover{color:var(--warn)}
+.legend{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.lg{display:grid;gap:4px;font-size:13px}
+.sw{display:flex;height:16px;border-radius:3px;overflow:hidden}
+.sw span{flex:1}
+.empty{color:var(--muted);text-align:center;padding:28px 8px}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:8px 14px;border-radius:4px;font-weight:600;font-size:13px;opacity:0;transition:opacity .2s;pointer-events:none}
+.toast.on{opacity:1}
+@media (prefers-reduced-motion:reduce){.toast{transition:none}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <h1>TF3 线路命名台</h1>
+      <p class="sub">颜色编码货物品类，名字编码拓扑位置。填起终点，自动出名字、编号和颜色。</p>
+    </div>
+    <div class="fmt">[区域]-[角色][品类][编号] 起点→终点</div>
+  </header>
+
+  <div class="grid">
+    <section class="panel" aria-label="新建线路">
+      <h2>新建线路</h2>
+
+      <div style="display:grid;gap:8px">
+        <span style="font-size:13px;font-weight:600">类型</span>
+        <div class="seg" id="kindSeg">
+          <button type="button" data-v="cargo" aria-pressed="true">货运</button>
+          <button type="button" data-v="pax" aria-pressed="false">客运</button>
+        </div>
+      </div>
+
+      <div class="row">
+        <label>起点<input id="origin" placeholder="铁矿 / 北港仓"></label>
+        <label>终点<input id="dest" placeholder="钢厂 / 西山市"></label>
+      </div>
+
+      <div id="cargoBox" style="display:grid;gap:16px">
+        <label>货物<input id="cargo" placeholder="原油、煤、木板、家具…"><span class="hint" id="detectHint">输入货物名会自动判断品类</span></label>
+        <div style="display:grid;gap:8px">
+          <span style="font-size:13px;font-weight:600">品类</span>
+          <div class="seg" id="catSeg"></div>
+        </div>
+        <div style="display:grid;gap:8px">
+          <span style="font-size:13px;font-weight:600">角色</span>
+          <div class="seg" id="roleSeg"></div>
+          <span class="hint" id="roleHint"></span>
+        </div>
+      </div>
+
+      <div id="paxBox" style="display:none;gap:16px">
+        <div style="display:grid;gap:8px">
+          <span style="font-size:13px;font-weight:600">交通方式</span>
+          <div class="seg" id="modeSeg"></div>
+        </div>
+      </div>
+
+      <div class="row">
+        <label>区域代码<input id="region" maxlength="4" placeholder="N"></label>
+        <label id="region2Lbl">对端区域（干线）<input id="region2" maxlength="4" placeholder="W"></label>
+      </div>
+
+      <div class="preview" aria-live="polite">
+        <div class="badge"><span class="chip" id="pChip">N-FB01</span></div>
+        <div class="pname" id="pName">N-FB01 铁矿→北港仓</div>
+        <div class="meta"><span id="pHex">#E0A35C</span><span id="pDesc">散装 · 支线</span></div>
+      </div>
+
+      <div class="btns">
+        <button class="btn primary" id="addBtn" type="button">加入线路表</button>
+        <button class="btn" id="copyName" type="button">复制名字</button>
+        <button class="btn" id="copyHex" type="button">复制颜色</button>
+      </div>
+    </section>
+
+    <section class="panel" aria-label="线路表">
+      <div class="board-top">
+        <h2>线路表</h2>
+        <div class="btns">
+          <button class="btn" id="exportBtn" type="button">复制全部</button>
+          <button class="btn" id="resetBtn" type="button">恢复示例</button>
+        </div>
+      </div>
+      <div class="stats" id="stats"></div>
+      <div class="tbl">
+        <table>
+          <thead><tr><th>编号</th><th>线路</th><th>货物</th><th>颜色</th><th>状态</th><th></th></tr></thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+      <div id="confirmBar" class="btns" hidden>
+        <span style="align-self:center;font-size:13px">清空当前表并恢复示例？</span>
+        <button class="btn primary" id="confirmYes" type="button">确认恢复</button>
+        <button class="btn" id="confirmNo" type="button">取消</button>
+      </div>
+
+      <h2 style="margin-top:8px">色板</h2>
+      <div class="legend" id="legend"></div>
+      <p class="hint" style="margin:0">同一色系里，干线最深、直达居中、支线最浅。白灰色的通用线越多，说明越该拆专用仓和专用车了。数据只存在你这个浏览器里。</p>
+    </section>
+  </div>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+const CATS = {
+  L:{name:"液体", shades:["#2B2238","#4E3D66","#9A88B8"]},
+  B:{name:"散装", shades:["#6B3A12","#B5651D","#E0A35C"]},
+  P:{name:"平板", shades:["#24405A","#4D7598","#93B4D0"]},
+  G:{name:"成品", shades:["#1F5A3A","#2E8B57","#86CDA3"]},
+  U:{name:"通用", shades:["#6E6E6E","#A8A8A8","#E2E2E2"]}
+};
+const ROLES = {
+  T:{name:"干线", idx:0, hint:"枢纽⇄枢纽，大车低频，两端都应是仓库"},
+  D:{name:"直达", idx:1, hint:"产地直接送消费者，不经仓库，链条最短"},
+  F:{name:"支线", idx:2, hint:"产地或城市 ⇄ 本区域枢纽，小车高频"}
+};
+const MODES = {
+  R:{name:"城际铁路", hex:"#C8332B"}, B:{name:"市内巴士", hex:"#2F6FD0"},
+  T:{name:"电车", hex:"#E3B505"}, A:{name:"航空", hex:"#7A4FC4"},
+  S:{name:"客船", hex:"#1C9A9A"}, H:{name:"直升机", hex:"#D0508A"}
+};
+const DETECT = [
+  ["L",["原油","油","燃料","汽油","化学","化工","液","水","牛奶","酒","crude","oil","fuel","chemical","liquid"]],
+  ["B",["煤","矿","石","谷","粮","沙","黏土","粘土","砂","渣","coal","ore","stone","grain","sand","clay","gravel"]],
+  ["P",["木","板","原木","钢","铁材","玻璃","机械","管","log","plank","steel","glass","machine","timber"]],
+  ["G",["家具","食品","罐头","工具","商品","货物","衣","肉","鱼","面包","goods","food","tool","furniture","fish","meat"]]
+];
+
+const state = {kind:"cargo", cat:"B", role:"F", mode:"R", catManual:false};
+const $ = id => document.getElementById(id);
+const store = {
+  get(){try{return JSON.parse(localStorage.getItem("tf3lines")||"null")}catch(e){return null}},
+  set(v){try{localStorage.setItem("tf3lines",JSON.stringify(v))}catch(e){}}
+};
+const SAMPLE = [
+  {kind:"cargo",region:"N",role:"F",cat:"B",num:1,origin:"铁矿",dest:"北港仓",cargo:"铁矿石"},
+  {kind:"cargo",region:"N",role:"F",cat:"B",num:2,origin:"煤矿",dest:"北港仓",cargo:"煤"},
+  {kind:"cargo",region:"NW",role:"T",cat:"B",num:1,origin:"北港仓",dest:"西山仓",cargo:"铁矿石+煤"},
+  {kind:"cargo",region:"W",role:"F",cat:"G",num:1,origin:"西山仓",dest:"西山市",cargo:"家具"},
+  {kind:"cargo",region:"D",role:"D",cat:"L",num:1,origin:"油田",dest:"炼油厂",cargo:"原油"},
+  {kind:"cargo",region:"W",role:"F",cat:"U",num:1,origin:"林场",dest:"西山仓",cargo:"原木"},
+  {kind:"pax",region:"NW",mode:"R",num:1,origin:"北港",dest:"西山"}
+];
+let lines = store.get() || SAMPLE.slice();
+
+function codeOf(l){
+  if(l.kind==="pax") return `${l.region}-P${l.mode}${String(l.num).padStart(2,"0")}`;
+  return `${l.region}-${l.role}${l.cat}${String(l.num).padStart(2,"0")}`;
+}
+function hexOf(l){ return l.kind==="pax" ? MODES[l.mode].hex : CATS[l.cat].shades[ROLES[l.role].idx]; }
+function fullName(l){ return `${codeOf(l)} ${l.origin||"?"}→${l.dest||"?"}`; }
+function textOn(hex){
+  const n=parseInt(hex.slice(1),16),r=n>>16,g=(n>>8)&255,b=n&255;
+  return (0.299*r+0.587*g+0.114*b)>150?"#1C211F":"#FFFFFF";
+}
+function regionCode(){
+  const a=($("region").value||"N").trim().toUpperCase();
+  const b=$("region2").value.trim().toUpperCase();
+  if(state.kind==="cargo" && state.role==="D") return "D";
+  if((state.kind==="pax" || state.role==="T") && b) return [a,b].sort().join("");
+  return a;
+}
+function nextNum(draft){
+  const same = lines.filter(l=>l.kind===draft.kind && l.region===draft.region &&
+    (draft.kind==="pax" ? l.mode===draft.mode : (l.role===draft.role && l.cat===draft.cat)));
+  return same.reduce((m,l)=>Math.max(m,l.num),0)+1;
+}
+function draft(){
+  const d={kind:state.kind,region:regionCode(),origin:$("origin").value.trim(),dest:$("dest").value.trim()};
+  if(state.kind==="pax"){d.mode=state.mode}else{d.role=state.role;d.cat=state.cat;d.cargo=$("cargo").value.trim()}
+  d.num=nextNum(d); return d;
+}
+function detect(txt){
+  const t=txt.toLowerCase(); if(!t) return null;
+  for(const [c,words] of DETECT) if(words.some(w=>t.includes(w))) return c;
+  return null;
+}
+
+function seg(el, items, key, onPick){
+  el.innerHTML="";
+  for(const [k,v] of Object.entries(items)){
+    const b=document.createElement("button"); b.type="button"; b.dataset.v=k;
+    const hex = v.shades ? v.shades[1] : v.hex;
+    b.innerHTML = hex ? `<span class="dot" style="background:${hex}"></span>${k} ${v.name}` : `${k} ${v.name}`;
+    b.setAttribute("aria-pressed", String(state[key]===k));
+    b.onclick=()=>{state[key]=k; onPick&&onPick(); refreshSegs(); render();};
+    el.appendChild(b);
+  }
+}
+function refreshSegs(){
+  for(const [id,key] of [["catSeg","cat"],["roleSeg","role"],["modeSeg","mode"],["kindSeg","kind"]])
+    $(id).querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.v===state[key])));
+  $("cargoBox").style.display = state.kind==="cargo"?"grid":"none";
+  $("paxBox").style.display = state.kind==="pax"?"grid":"none";
+  $("roleHint").textContent = ROLES[state.role].hint;
+  const needs2 = state.kind==="pax" || state.role==="T";
+  $("region2Lbl").style.opacity = needs2?1:.45;
+  $("region").disabled = state.kind==="cargo" && state.role==="D";
+}
+
+function render(){
+  const d=draft(), hex=hexOf(d);
+  const chip=$("pChip"); chip.textContent=codeOf(d); chip.style.background=hex; chip.style.color=textOn(hex);
+  $("pName").textContent=fullName(d);
+  $("pHex").textContent=hex;
+  $("pDesc").textContent = d.kind==="pax" ? `客运 · ${MODES[d.mode].name}` : `${CATS[d.cat].name} · ${ROLES[d.role].name}`;
+  renderTable();
+}
+
+function status(l){
+  if(l.kind==="pax") return `<span class="tag ok">客运</span>`;
+  if(l.cat==="U") return `<span class="tag warn">待专业化</span>`;
+  if(l.role==="T" && !/仓|港|枢纽|hub/i.test(l.origin+l.dest)) return `<span class="tag warn">干线两端非仓库?</span>`;
+  return `<span class="tag ok">正常</span>`;
+}
+function renderTable(){
+  const tb=$("tbody"); tb.innerHTML="";
+  if(!lines.length){tb.innerHTML=`<tr><td colspan="6" class="empty">还没有线路。在左边填起终点，点“加入线路表”。</td></tr>`;}
+  const sorted=[...lines].sort((a,b)=>codeOf(a).localeCompare(codeOf(b)));
+  sorted.forEach(l=>{
+    const hex=hexOf(l), tr=document.createElement("tr");
+    tr.innerHTML=`<td class="code"><span class="stripe" style="background:${hex}"></span>${codeOf(l)}</td>
+      <td>${esc(l.origin)}→${esc(l.dest)}</td>
+      <td>${l.kind==="pax"?MODES[l.mode].name:esc(l.cargo||CATS[l.cat].name)}</td>
+      <td style="font-family:var(--mono);font-size:12px">${hex}</td>
+      <td>${status(l)}</td>
+      <td><button class="x" aria-label="删除 ${codeOf(l)}">✕</button></td>`;
+    tr.querySelector(".x").onclick=()=>{lines=lines.filter(x=>x!==l);store.set(lines);render();};
+    tb.appendChild(tr);
+  });
+  const c=lines.filter(l=>l.kind==="cargo"), u=c.filter(l=>l.cat==="U").length;
+  const by=r=>c.filter(l=>l.role===r).length;
+  $("stats").innerHTML=`<span class="pill">共 ${lines.length} 条</span><span class="pill">干线 ${by("T")}</span><span class="pill">支线 ${by("F")}</span><span class="pill">直达 ${by("D")}</span><span class="pill">客运 ${lines.length-c.length}</span>`+(u?`<span class="pill warn">通用 ${u}</span>`:"");
+}
+function esc(s){return String(s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+
+function legend(){
+  const el=$("legend");
+  for(const [k,v] of Object.entries(CATS))
+    el.insertAdjacentHTML("beforeend",`<div class="lg"><div class="sw">${v.shades.map(h=>`<span style="background:${h}"></span>`).join("")}</div><span><b>${k}</b> ${v.name} · 干/直/支</span></div>`);
+  el.insertAdjacentHTML("beforeend",`<div class="lg"><div class="sw">${Object.values(MODES).map(m=>`<span style="background:${m.hex}"></span>`).join("")}</div><span><b>P</b> 客运 · 铁/巴/电/空/船/直</span></div>`);
+}
+
+let tt; function toast(m){const t=$("toast");t.textContent=m;t.classList.add("on");clearTimeout(tt);tt=setTimeout(()=>t.classList.remove("on"),1600);}
+function copy(text,msg){
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(()=>toast(msg),()=>fallback(text,msg));
+  } else fallback(text,msg);
+}
+function fallback(text,msg){
+  const ta=document.createElement("textarea");ta.value=text;document.body.appendChild(ta);ta.select();
+  try{document.execCommand("copy");toast(msg)}catch(e){toast("复制失败，请手动选中")}
+  ta.remove();
+}
+
+seg($("catSeg"),CATS,"cat",()=>{state.catManual=true});
+seg($("roleSeg"),ROLES,"role");
+seg($("modeSeg"),MODES,"mode");
+$("kindSeg").querySelectorAll("button").forEach(b=>b.onclick=()=>{state.kind=b.dataset.v;refreshSegs();render();});
+["origin","dest","region","region2"].forEach(id=>$(id).addEventListener("input",render));
+$("cargo").addEventListener("input",e=>{
+  const c=detect(e.target.value);
+  if(c && !state.catManual){state.cat=c;$("detectHint").textContent=`判断为 ${CATS[c].name}，可手动改`;}
+  else if(!e.target.value){state.catManual=false;$("detectHint").textContent="输入货物名会自动判断品类";}
+  else if(!c){$("detectHint").textContent="没认出来，请手动选品类";}
+  refreshSegs();render();
+});
+$("addBtn").onclick=()=>{
+  const d=draft();
+  if(!d.origin||!d.dest){toast("先填起点和终点");return;}
+  lines.push(d);store.set(lines);
+  ["origin","dest","cargo"].forEach(id=>$(id).value="");state.catManual=false;
+  $("detectHint").textContent="输入货物名会自动判断品类";
+  render();toast(`已加入 ${codeOf(d)}`);
+};
+$("copyName").onclick=()=>copy(fullName(draft()),"名字已复制");
+$("copyHex").onclick=()=>copy(hexOf(draft()),"颜色已复制");
+$("exportBtn").onclick=()=>copy([...lines].sort((a,b)=>codeOf(a).localeCompare(codeOf(b))).map(l=>`${fullName(l)}\t${hexOf(l)}`).join("\n"),"线路表已复制");
+$("resetBtn").onclick=()=>{$("confirmBar").hidden=false};
+$("confirmNo").onclick=()=>{$("confirmBar").hidden=true};
+$("confirmYes").onclick=()=>{lines=SAMPLE.slice();store.set(lines);$("confirmBar").hidden=true;render();toast("已恢复示例");};
+
+$("origin").value="铁矿";$("dest").value="北港仓";$("cargo").value="铁矿石";$("region").value="N";$("region2").value="W";
+legend();refreshSegs();render();
+</script>
